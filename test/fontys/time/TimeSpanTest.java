@@ -13,17 +13,21 @@ import static org.junit.Assert.*;
  * @author fhict
  */
 public class TimeSpanTest {
-    TimeSpan ts = new TimeSpan(new Time(2015, 10, 2, 10,10),new Time(2015, 11, 2, 10,10));
+       TimeSpan ts = new TimeSpan(new Time(2015, 10, 2, 10,10),new Time(2015, 11, 2, 10,10));
+       
     public TimeSpanTest() {
+       
+    }
+    @Test (expected = IllegalArgumentException.class) 
+    public void testConstructor(){
+         TimeSpan ts = new TimeSpan(new Time(2015, 10, 2, 10,10),new Time(2015, 10, 2, 10,10));
     }
 
     /**
      * Test of getBeginTime method, of class TimeSpan.
      */
     @Test
-    public void testGetBeginTime() {
-        System.out.println("getBeginTime");
-      
+    public void testGetBeginTime() {      
         ITime expResult = new Time(2015, 10, 2, 10,10);
         ITime result = ts.getBeginTime();
         assertEquals(expResult, result);
@@ -34,9 +38,7 @@ public class TimeSpanTest {
      * Test of getEndTime method, of class TimeSpan.
      */
     @Test
-    public void testGetEndTime() {
-        System.out.println("getEndTime");
-        
+    public void testGetEndTime() {        
         ITime expResult = new Time(2015, 11, 2, 10,10);
         ITime result = ts.getEndTime();
         assertEquals(expResult, result);
@@ -47,39 +49,50 @@ public class TimeSpanTest {
      * Test of length method, of class TimeSpan.
      */
     @Test
-    public void testLength() {
-        System.out.println("length");
-       
-        int expResult = new Time(2015, 10, 2, 10,10).difference(new Time(2015, 11, 2, 10,10));
+    public void testLength() {       
+        int expResult = 6; 
         int result = ts.length();
+        
         assertEquals(expResult, result);
-        //fail("The test case is a prototype.");
     }
 
-    /**
+     /**
      * Test of setBeginTime method, of class TimeSpan.
      */
     @Test
     public void testSetBeginTime() {
-        System.out.println("setBeginTime");
-        ITime beginTime = new Time(2015, 10, 2, 10,10);
+        ITime beginTime = new Time(2014, 10, 1, 10,10);
        
         ts.setBeginTime(beginTime);
-        //fail("The test case is a prototype.");
+        ITime result = ts.getBeginTime();
+        assertEquals(beginTime, result);
     }
-
+    @Test (expected = IllegalArgumentException.class)
+        public void testSetBeginTimeSameAsEnd() {
+        ITime beginTime = new Time(2015, 11, 2, 10,10);
+       
+        ts.setBeginTime(beginTime);
+        ITime result = ts.getBeginTime();
+        assertEquals(beginTime, result);
+    }
     /**
      * Test of setEndTime method, of class TimeSpan.
      */
     @Test
     public void testSetEndTime() {
-        System.out.println("setEndTime");
-        ITime endTime = new Time(2015, 11, 2, 10,10);
-        ITime endTimeBeforeStart = new Time(2015, 10, 2, 10,10);
+        ITime endTime = new Time(2017, 10, 1, 10,10);
+       
         ts.setEndTime(endTime);
-        ts.setEndTime(endTimeBeforeStart);
-        
-       // fail("The test case is a prototype.");
+        ITime result = ts.getEndTime();
+        assertEquals(endTime, result);
+    }
+    @Test (expected = IllegalArgumentException.class)
+    public void testSetEndTimeSameAsBegin() {
+        ITime endTime = new Time(2015, 10, 2, 10,10);
+       
+        ts.setEndTime(endTime);
+        ITime result = ts.getEndTime();
+        assertEquals(endTime, result);
     }
 
     /**
@@ -87,11 +100,9 @@ public class TimeSpanTest {
      */
     @Test
     public void testMove() {
-        System.out.println("move");
         int minutes = 10;
        
         ts.move(minutes);
-       // fail("The test case is a prototype.");
     }
 
     /**
@@ -99,77 +110,110 @@ public class TimeSpanTest {
      */
     @Test
     public void testChangeLengthWith() {
-        System.out.println("changeLengthWith");
         int minutes = 10;
         
-        ts.changeLengthWith(minutes);
-        
-        minutes = 0;
-        ts.changeLengthWith(minutes);
-       // fail("The test case is a prototype.");
+        ts.changeLengthWith(minutes);      
     }
+    @Test (expected = IllegalArgumentException.class)
+    public void testChangeLengthWithZero() {
+        int minutes = 0;
+        
+        ts.changeLengthWith(minutes);
+    }
+
 
     /**
      * Test of isPartOf method, of class TimeSpan.
      */
     @Test
     public void testIsPartOf() {
-        System.out.println("isPartOf");
         ITimeSpan timeSpan = new TimeSpan(new Time(2015, 10, 2, 10,10),new Time(2015, 11, 2, 10,10));
        
         boolean expResult = true;
         boolean result = ts.isPartOf(timeSpan);
         assertEquals(expResult, result);
         
-        timeSpan = new TimeSpan(new Time(2015, 12, 2, 10,10),new Time(2015, 12, 2, 10,10));
+        timeSpan = new TimeSpan(new Time(2015, 12, 2, 10,10),new Time(2015, 12, 2, 10,11));
         expResult = false;
         result = ts.isPartOf(timeSpan);
-           assertEquals(expResult, result);
-      //  fail("The test case is a prototype.");
+        assertEquals(expResult, result);
     }
 
-    /**
-     * Test of unionWith method, of class TimeSpan.
-     */
+    //This test adds two timespans after eachother
     @Test
-    public void testUnionWith() {
-        System.out.println("unionWith");
-        ITimeSpan timeSpan = new TimeSpan(new Time(2015, 10, 2, 10,10),new Time(2015, 11, 2, 10,10));
+    public void testUnionWithEndsLater() {
+        ITimeSpan timeSpanFirst = new TimeSpan(new Time(2015, 8, 1, 10,10),new Time(2015, 11, 2, 10,10));
         
-        ITimeSpan expResult = new TimeSpan(new Time(2015, 10, 2, 10,10),new Time(2015, 11, 2, 10,10));
-        ITimeSpan result = ts.unionWith(timeSpan);
+        ITimeSpan timeSpanLast = new TimeSpan(new Time(2015, 9, 2, 10,10),new Time(2015, 12, 2, 10,10));
+        
+        ITimeSpan expResult = new TimeSpan(new Time(2015, 8, 1, 10,10),new Time(2015, 12, 2, 10,10));
+        ITimeSpan result = timeSpanFirst.unionWith(timeSpanLast);
         assertEquals(expResult, result);
+    }
+    //This test adds two timespans where the first timespan ends later than the last timespan
+    @Test
+    public void testUnionWithEndsSooner() {
+        ITimeSpan timeSpanFirst = new TimeSpan(new Time(2015, 8, 1, 10,10),new Time(2015, 12, 2, 10,10));
         
+        ITimeSpan timeSpanLast = new TimeSpan(new Time(2015, 9, 2, 10,10),new Time(2015, 11, 2, 10,10));
         
-        //timeSpan = new TimeSpan(new Time(2015, 9, 4, 9,5),new Time(2015, 8, 3, 10,10));;
-        //expResult = new TimeSpan(new Time(2015, 10, 2, 10,10),new Time(2015, 11, 2, 10,10));;
-        //result = ts.unionWith(timeSpan);
-        //assertEquals(expResult, result);
+        ITimeSpan expResult = new TimeSpan(new Time(2015, 8, 1, 10,10),new Time(2015, 12, 2, 10,10));
+        ITimeSpan result = timeSpanFirst.unionWith(timeSpanLast);
+        assertEquals(expResult, result);
+    }
+    //This test adds two timespans where the first timespan starts later than the last timespan
+    @Test
+    public void testUnionWithStartSooner() {
+        ITimeSpan timeSpanFirst = new TimeSpan(new Time(2015, 9, 1, 10,10),new Time(2015, 11, 2, 10,10));
         
+        ITimeSpan timeSpanLast = new TimeSpan(new Time(2015, 8, 2, 10,10),new Time(2015, 12, 2, 10,10));
         
-        //fail("The test case is a prototype.");
+        ITimeSpan expResult = new TimeSpan(new Time(2015, 8, 1, 10,10),new Time(2015, 12, 2, 10,10));
+        ITimeSpan result = timeSpanFirst.unionWith(timeSpanLast);
+        assertEquals(expResult, result);
+    }
+    //This test adds two the same timespans
+    @Test
+    public void testUnionWithSame() {
+        ITimeSpan timeSpanFirst = new TimeSpan(new Time(2015, 8, 1, 10,10),new Time(2015, 11, 2, 10,10));
+        
+        ITimeSpan timeSpanLast = new TimeSpan(new Time(2015, 8, 1, 10,10),new Time(2015, 11, 2, 10,10));
+        
+        ITimeSpan expResult = new TimeSpan(new Time(2015, 8, 1, 10,10),new Time(2015, 11, 2, 10,10));
+        ITimeSpan result = timeSpanFirst.unionWith(timeSpanLast);
+        assertEquals(expResult, result);
     }
 
     /**
      * Test of intersectionWith method, of class TimeSpan.
      */
+    //TimeSpan ts = new TimeSpan(new Time(2015, 10, 2, 10,10),new Time(2015, 11, 2, 10,10));
     @Test
     public void testIntersectionWith() {
-        System.out.println("intersectionWith");
-        ITimeSpan timeSpan = new TimeSpan(new Time(2015, 10, 2, 10,10),new Time(2015, 11, 2, 10,10));
-        TimeSpan instance = new TimeSpan(new Time(2015, 10, 2, 10,10),new Time(2015, 11, 2, 10,10));
-        ITimeSpan expResult = new TimeSpan(new Time(2015, 10, 2, 10,10),new Time(2015, 11, 2, 10,10));
-        ITimeSpan result = instance.intersectionWith(timeSpan);
+        TimeSpan timeSpan = new TimeSpan(new Time(2015, 9, 2, 10,10),new Time(2015, 12, 2, 10,10));
+        
+        ITimeSpan expResult = new TimeSpan(new Time(2015, 10, 2, 10,0),new Time(2015, 10, 2, 10,10));
+        ITimeSpan result = ts.intersectionWith(timeSpan);
+        assertEquals(expResult, result);
+ }
+
+  @Test
+    public void testIntersectionWith2() {
+
+        TimeSpan timeSpan = new TimeSpan(new Time(2015, 11, 2, 10,10),new Time(2015, 12, 2, 10,10));
+        ITimeSpan expResult = new TimeSpan(new Time(2015, 10, 2, 10,0),new Time(2015, 10, 2, 10,10));
+        ITimeSpan result = ts.intersectionWith(timeSpan);
         assertEquals(expResult, result);
         
-        timeSpan = new TimeSpan(new Time(2015, 10, 2, 10,10),new Time(2015, 11, 2, 10,10));
-        expResult = new TimeSpan(new Time(2015, 10, 2, 10,10),new Time(2015, 11, 2, 10,10));
-        instance = new TimeSpan(new Time(2015, 10, 2, 10,10),new Time(2015, 11, 2, 10,10));
-        result = instance.intersectionWith(timeSpan);
-        assertEquals(expResult, result);
-        
-        
-        fail("The test case is a prototype.");
+       
     }
+    @Test
+    public void testIntersectionWith3() {   
+        ITimeSpan timeSpan = new TimeSpan(new Time(2015, 10, 2, 10,10),new Time(2015, 11, 2, 10,10));
+        ITimeSpan expResult = new TimeSpan(new Time(2015, 10, 2, 10,0),new Time(2015, 11, 2, 10,10));
+        ITimeSpan result = ts.intersectionWith(timeSpan);
+        assertEquals(expResult, result);
+    }
+
     
 }
